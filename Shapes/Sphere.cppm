@@ -12,7 +12,6 @@ import EBO;
 
 export constexpr const char* SphereVertPath = "glsl/sphere.vert";
 export constexpr const char* SphereFragPath = "glsl/sphere.frag";
-
 export class Sphere : public BaseShape3D
 {
 public:
