@@ -3,7 +3,7 @@ module;
 
 export module CelestialBody;
 import Sphere;
-
+// Hindi pa gets
 class CelestialBody
 {
 public:
