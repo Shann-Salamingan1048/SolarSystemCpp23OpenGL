@@ -11,8 +11,9 @@ export inline GLuint compileShader(const char* source, GLenum type, const char* 
 export class Shader
 {
 public:
-
+	Shader() = default;
 	explicit Shader(const char* vertPath, const char* fragPath);
+	void init(const char* vertPath, const char* fragPath);
 	void use() const noexcept;
 	[[nodiscard]]GLuint getID() const noexcept { return m_ID;}; // [[nodiscard]] "Hey, the return value of this function is important. If the caller ignores it, generate a warning."
 	// COMPILER WARNING: "Return value ignored: 'getHealth' declared with attribute 'nodiscard'" p.getHealth(); CORRECT:int h = p.getHealth();

@@ -28,8 +28,11 @@ set(MODULE_INTERFACE_FILES
         Utilities/globalFunctions.cppm
         Utilities/TimeUtils.cppm
         Utilities/ResourceManager.cppm
+        Utilities/DefaultValues.cppm
         Renderer/Renderer.cppm
         CelestialBodies/CelestialBody.cppm
+        CelestialBodies/Planet.cppm
+
 )
 
 set(MODULE_IMPLEMENTATION_FILES
@@ -43,6 +46,8 @@ set(MODULE_IMPLEMENTATION_FILES
         vbo.cpp
         ebo.cpp
         Texture.cpp
+        Utilities/ResourceManager.cpp
+        CelestialBodies/Planet.cpp
 )
 add_executable(SolarSystem)
 
@@ -65,6 +70,9 @@ add_custom_target(sync_assets ALL
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/glsl
         $<TARGET_FILE_DIR:SolarSystem>/glsl
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/Pics
+        $<TARGET_FILE_DIR:SolarSystem>/Pics
         COMMENT "Syncing shader and texture assets..."
 )
 add_dependencies(SolarSystem sync_assets)

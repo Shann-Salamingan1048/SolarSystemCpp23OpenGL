@@ -19,5 +19,6 @@ public:
     };
     Size size;
 
+
 };
 inline BaseShape3D::~BaseShape3D() = default;

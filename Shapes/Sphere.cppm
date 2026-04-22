@@ -1,5 +1,6 @@
 module;
 #include <vector>
+#include <cstdint>
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
@@ -10,26 +11,31 @@ import VAO;
 import VBO;
 import EBO;
 
-export constexpr const char* SphereVertPath = "glsl/sphere.vert";
-export constexpr const char* SphereFragPath = "glsl/sphere.frag";
 
 export class Sphere : public BaseShape3D
 {
 public:
-    explicit Sphere(float radius = 0.5f, uint32_t sectors = 36, uint32_t stacks = 18);
+    Sphere() = default;
+    explicit Sphere(float radius, uint32_t sectors, uint32_t stacks);
     Sphere(uint16_t width, uint16_t height, uint16_t depth,
            float radius = 0.5f, uint32_t sectors = 36, uint32_t stacks = 18);
     ~Sphere() override;
 
     void Draw() override;
 
-private:
-    void BuildSphere(float radius, uint32_t sectors, uint32_t stacks);
+    void init(float radius = 0.5f, uint32_t sectors = 36, uint32_t stacks = 18);
+    void init(uint16_t width, uint16_t height, uint16_t depth,
+              float radius = 0.5f, uint32_t sectors = 36, uint32_t stacks = 18);
 
 private:
-    std::vector<GLfloat>  m_vertices; // x, y, z
-    std::vector<GLuint>   m_indices;
-    GLsizei               m_indexCount = 0;
+    void BuildSphere(float radius, uint32_t sectors, uint32_t stacks);
+    void SetupBuffers();
+    void ReleaseBuffers();
+
+private:
+    std::vector<GLfloat> m_vertices;
+    std::vector<GLuint>  m_indices;
+    GLsizei m_indexCount = 0;
 
     VAO m_vao{};
     VBO m_vbo{};

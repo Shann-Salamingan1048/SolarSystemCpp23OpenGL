@@ -8,6 +8,9 @@ public:
     GLuint ID;
     GLenum type;
     Texture(const char* image, GLenum texType, GLenum slot, GLenum pixelType, bool verticalEnable);
+    Texture() = default;
+
+    void init(const char* image, GLenum texType, GLenum slot, GLenum pixelType, bool verticalEnable);
 
     void setActiveTexture(GLenum slot);
     void setFilterMipMap(GLint filer1, GLint filter2);

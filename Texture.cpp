@@ -5,6 +5,11 @@
 module Texture;
 Texture::Texture(const char* image, GLenum texType, GLenum slot, GLenum pixelType, bool verticalEnable)
 {
+	init(image, texType,slot,pixelType,verticalEnable);
+}
+
+void Texture::init(const char *image, GLenum texType, GLenum slot, GLenum pixelType, bool verticalEnable)
+{
 	type = texType;
 	std::println("Loading texture: {}", image);
 
@@ -21,12 +26,12 @@ Texture::Texture(const char* image, GLenum texType, GLenum slot, GLenum pixelTyp
 	GLenum imgFormat;
 	switch (numColCh)
 	{
-	case 1: imgFormat = GL_RED;  break;
-	case 4: imgFormat = GL_RGBA; break;
-	default:
-		imgFormat = GL_RGB;
-		std::println("Warning: unexpected numColCh = {}, defaulting to GL_RGB", numColCh);
-		break;
+		case 1: imgFormat = GL_RED;  break;
+		case 4: imgFormat = GL_RGBA; break;
+		default:
+			imgFormat = GL_RGB;
+			std::println("Warning: unexpected numColCh = {}, defaulting to GL_RGB", numColCh);
+			break;
 	}
 
 	glGenTextures(1, &ID);
@@ -42,6 +47,7 @@ Texture::Texture(const char* image, GLenum texType, GLenum slot, GLenum pixelTyp
 
 	stbi_image_free(bytes);
 }
+
 void Texture::setFilterTexture(GLint filter1, GLint filter2)
 {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, filter1);

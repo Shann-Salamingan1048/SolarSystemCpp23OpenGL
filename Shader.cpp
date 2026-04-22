@@ -5,7 +5,13 @@
 #include <print>
 module Shader;
 
-Shader::Shader(const char* vertPath, const char* fragPath) : m_ID{0}
+Shader::Shader(const char* vertPath, const char* fragPath)
+	: m_ID{0}
+{
+	init(vertPath, fragPath);
+}
+
+void Shader::init(const char *vertPath, const char *fragPath)
 {
 	try
 	{
