@@ -38,7 +38,7 @@ export namespace Game
     private:
 
         Renderer m_renderer{};
-        Shader m_sphereShader{SphereVertPath, SphereFragPath};
+
         MouseClickState m_mouseState{MouseClickState::None};
     };
 }

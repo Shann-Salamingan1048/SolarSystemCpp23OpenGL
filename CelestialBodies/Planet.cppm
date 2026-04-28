@@ -1,12 +1,12 @@
 module;
 
-
+#include <cstdint>
 export module Planet;
 import CelestialBody;
 import ResourceManager;
 
 
-export enum class PlanetsEnum
+export enum class PlanetsEnum : uint8_t
 {
     MERCURY,
     VENUS,
@@ -22,11 +22,11 @@ export enum class PlanetsEnum
 };
 
 export inline void initPlanetTextures();
-
+export inline void initPlanetShaders();
 export class Planet : public CelestialBody
 {
 public:
-    Planet(PlanetsEnum planet);
+    Planet(const PlanetsEnum& planet);
 
     void Draw() override;
 
