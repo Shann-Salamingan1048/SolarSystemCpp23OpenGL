@@ -1,47 +1,48 @@
 
 #include <print>
-import Engine;
-import SolarSystem;
+#include "Engine/Engine.hpp"
+#include "SolarSystem.hpp"
 #ifdef _WIN32
-#include <windows.h>
-extern "C"
-{
-__declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
-__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
-}
+    #include <windows.h>
+    extern "C"
+    {
+    __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+    __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+    }
 #elif defined(__linux__)
+
 #include <cstdlib>
 #include <unistd.h>
 #include <limits.h>
 
-void ensure_high_performance_gpu()
-{
-    if (std::getenv("__NV_PRIME_RENDER_OFFLOAD") == nullptr)
+    void ensure_high_performance_gpu()
     {
-        std::println("Restarting with NVIDIA GPU...");
-
-        // Set the environment variables for the current process space
-        setenv("__NV_PRIME_RENDER_OFFLOAD", "1", 1);
-        setenv("__GLX_VENDOR_LIBRARY_NAME", "nvidia", 1);
-
-        // Get the absolute path to the current executable
-        char exePath[PATH_MAX];
-        ssize_t len = readlink("/proc/self/exe", exePath, sizeof(exePath) - 1);
-
-        if (len != -1)
+        if (std::getenv("__NV_PRIME_RENDER_OFFLOAD") == nullptr)
         {
-            exePath[len] = '\0';
+            std::println("Restarting with NVIDIA GPU...");
 
-            // execv replaces the current process image with a new one.
-            // It inherits the environment variables we just set above.
-            char *args[] = {exePath, nullptr};
-            execv(exePath, args);
+            // Set the environment variables for the current process space
+            setenv("__NV_PRIME_RENDER_OFFLOAD", "1", 1);
+            setenv("__GLX_VENDOR_LIBRARY_NAME", "nvidia", 1);
 
-            // If execv succeeds, this line is never reached.
+            // Get the absolute path to the current executable
+            char exePath[PATH_MAX];
+            ssize_t len = readlink("/proc/self/exe", exePath, sizeof(exePath) - 1);
+
+            if (len != -1)
+            {
+                exePath[len] = '\0';
+
+                // execv replaces the current process image with a new one.
+                // It inherits the environment variables we just set above.
+                char *args[] = {exePath, nullptr};
+                execv(exePath, args);
+
+                // If execv succeeds, this line is never reached.
+            }
+            std::println("Failed to restart binary for NVIDIA offloading.");
         }
-        std::println("Failed to restart binary for NVIDIA offloading.");
     }
-}
 #endif
 
 int main()

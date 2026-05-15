@@ -1,12 +1,10 @@
-module;
+#include "ResourceManager.hpp"
 #include <stdexcept>
-#include <string>
-#include <utility>
-#include <unordered_map>
-#include <memory>
-#include <glad/glad.h>
-module ResourceManager;
 
+#include <utility>
+
+#include "../Shader.hpp"
+#include "../Texture.hpp"
 
 std::unordered_map<std::string, std::unique_ptr<Shader>> ResourceManager::s_shaders{};
 std::unordered_map<std::string, std::unique_ptr<Texture>> ResourceManager::s_textures{};

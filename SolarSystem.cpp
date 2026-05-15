@@ -1,14 +1,14 @@
-module;
-
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <print>
 
-module SolarSystem;
+#include "SolarSystem.hpp"
+#include "CelestialBodies/Planet.hpp"
+#include "Camera.hpp"
+#include "Utilities/TimeUtils.hpp"
+#include "Utilities/globalFunctions.hpp"
 
-import Camera;
-import Time;
-import globalFunctions;
 
 namespace Game
 {
@@ -24,16 +24,21 @@ namespace Game
 
     void SolarSystem::initObjects()
     {
-        const auto& size = getScreenSize();
-        const auto projection = glm::perspective(
-            glm::radians(45.0f),
-            static_cast<float>(size.x) / static_cast<float>(size.y),
-            0.01f,
-            100.0f);
+        initPlanetShaders();
+        initPlanetTextures();
+        m_celestialBodies.emplace_back(std::make_unique<Planet>(PlanetsEnum::MERCURY));
+        m_celestialBodies.emplace_back(std::make_unique<Planet>(PlanetsEnum::VENUS));
+        m_celestialBodies.emplace_back(std::make_unique<Planet>(PlanetsEnum::EARTH));
+        m_celestialBodies.emplace_back(std::make_unique<Planet>(PlanetsEnum::MARS));
+        m_celestialBodies.emplace_back(std::make_unique<Planet>(PlanetsEnum::JUPITER));
+        m_celestialBodies.emplace_back(std::make_unique<Planet>(PlanetsEnum::SATURN));
+        m_celestialBodies.emplace_back(std::make_unique<Planet>(PlanetsEnum::URANUS));
+        m_celestialBodies.emplace_back(std::make_unique<Planet>(PlanetsEnum::NEPTUNE));
 
-        m_sphereShader.use();
-        m_sphereShader.setMat4("projection", projection);
-        m_sphereShader.setVec3("objectColor", glm::vec3{0.0f, 0.0f, 1.0f});
+    }
+
+    void SolarSystem::initMath()
+    {
     }
 
     void SolarSystem::update()
@@ -46,38 +51,33 @@ namespace Game
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        const auto& view = getCamera().GetViewMatrix();
-        m_sphereShader.use();
-        m_sphereShader.setMat4("view", view);
     }
-
     void SolarSystem::render()
     {
-        m_sphereShader.use();
         resizeObjects();
 
-        for (const auto& spherePos : SpherePositions)
-        {
-            auto model = glm::mat4{1.0f};
-            model = glm::translate(model, spherePos);
+        const auto& size = getScreenSize();
+        const auto projection = glm::perspective(
+            glm::radians(45.0f),
+            static_cast<float>(size.x) / static_cast<float>(size.y),
+            0.01f,
+            100.0f);
 
-            m_sphereShader.setMat4("model", model);
-            m_sphere.Draw();
+
+        for (const auto& celestialPos : celestialBodiesPositions)
+        {
+            m_renderer.DrawTexturedSphere(*m_celestialBodies[0], getCamera().GetViewMatrix(), projection, glm::vec3{0.0f, 0.0f, 1.0f}, celestialPos);
         }
     }
 
     void SolarSystem::resizeObjects() const
     {
-        const auto& size = getScreenSize();
 
-        m_sphereShader.use();
-        m_sphereShader.setVec3("aSize", glm::vec3{m_sphere.size.width, m_sphere.size.height, m_sphere.size.depth});
-        m_sphereShader.setVec2("screenSize", glm::vec2{static_cast<float>(size.x), static_cast<float>(size.y)});
     }
 
     void SolarSystem::cleanUp()
     {
-        m_sphereShader.deleteShader();
+
     }
 
     void SolarSystem::onKeyAction(int key, int action, int mods)
@@ -112,7 +112,7 @@ namespace Game
         const auto mousePos = ShannUtilities::getMousePosition(&getWindow());
         const auto normalizedMousePos = ShannUtilities::getNormalizedVersion2D(mousePos, size);
 
-        std::println("Mouse Pos: {}, {}", normalizedMousePos.x, normalizedMousePos.y);
+        //std::println("Mouse Pos: {}, {}", normalizedMousePos.x, normalizedMousePos.y);
 
         const auto rayClip = glm::vec4{normalizedMousePos.x, normalizedMousePos.y, -1.0f, 1.0f};
         const auto projection = glm::perspective(
@@ -131,8 +131,8 @@ namespace Game
         constexpr float spawnDistance = 5.0f;
         const glm::vec3 spawnPos = camera.Position + (rayWorld * spawnDistance);
 
-        AddSphere(spawnPos);
-        std::println("Spawned cube via Raycast at: {}, {}, {}", spawnPos.x, spawnPos.y, spawnPos.z);
+        AddCelestialBodyPos(spawnPos);
+        //std::println("Spawned cube via Raycast at: {}, {}, {}", spawnPos.x, spawnPos.y, spawnPos.z);
 
         m_mouseState = MouseClickState::LeftClick;
     }

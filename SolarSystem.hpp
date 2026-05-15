@@ -1,14 +1,16 @@
-module;
+
+#pragma once
 
 #include <cstdint>
+#include <memory>
+#include <vector>
 
-export module SolarSystem;
+#include "Engine/Engine.hpp"
+#include "CelestialBodies/CelestialBody.hpp"
+#include "Renderer/Renderer.hpp"
 
-import Engine;
-import Sphere;
-import Shader;
-import Renderer;
-export namespace Game
+
+namespace Game
 {
     enum class MouseClickState : std::uint8_t
     {
@@ -30,14 +32,18 @@ export namespace Game
         void render() override;
         void cleanUp() override;
         void initObjects() override;
+        void initMath() override;
         void onKeyAction(int key, int action, int mods) override;
         void onMouseClick(int button, int action, int mods) override;
 
         void resizeObjects() const;
 
     private:
-
         Renderer m_renderer{};
+
+        using CelestialBodyPtr = std::unique_ptr<CelestialBody, std::default_delete<CelestialBody>>;
+
+        std::vector<CelestialBodyPtr> m_celestialBodies;
 
         MouseClickState m_mouseState{MouseClickState::None};
     };

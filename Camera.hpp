@@ -1,8 +1,8 @@
-module;
+#pragma once
 #include <glad/glad.h> // Required for GLboolean
-#include <glm/glm.hpp>
-export module Camera;
-export namespace CameraUtils
+#include <glm/gtc/matrix_transform.hpp>
+
+namespace CameraUtils
 {
     enum class Camera_Movement : uint8_t
     {

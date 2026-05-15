@@ -1,5 +1,5 @@
-module;
-
+#pragma once
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
@@ -7,11 +7,9 @@ module;
 #include <string_view>
 #include <utility>
 
-export module Engine;
+#include "../Camera.hpp"
 
-import Camera;
-
-export namespace Core
+namespace Core
 {
     class Engine
     {
@@ -51,6 +49,7 @@ export namespace Core
         virtual void render() = 0;
         virtual void cleanUp() = 0;
         virtual void initObjects() = 0;
+        virtual void initMath() = 0;
         virtual void onMouseClick(int button, int action, int mods) = 0;
         virtual void onKeyAction(int key, int action, int mods) = 0;
 
@@ -65,7 +64,7 @@ export namespace Core
         static void mouseMoveCallback(GLFWwindow* window, double xpos, double ypos) noexcept;
         static void printCurrentGpu() noexcept;
         static auto fromWindow(GLFWwindow* window) noexcept -> Engine*;
-
+        static auto glfwErrorCallBack(int error,const char* description);
     private:
         std::string m_title;
         CameraUtils::Camera m_camera{glm::vec3(0.0f, 0.0f, 3.0f)};

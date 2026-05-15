@@ -1,14 +1,14 @@
-module;
+#pragma once
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <string>
 #include <unordered_map>
-export module Shader;
-export inline std::string readShaderFile(const char* filePath);
-export inline GLuint createShaderProgram(GLuint vertShader, GLuint fragShader);
-export inline GLuint compileShader(const char* source, GLenum type, const char* typeName);
 
-export class Shader
+inline std::string readShaderFile(const char* filePath);
+inline GLuint createShaderProgram(GLuint vertShader, GLuint fragShader);
+inline GLuint compileShader(const char* source, GLenum type, const char* typeName);
+
+class Shader
 {
 public:
 	Shader() = default;

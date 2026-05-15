@@ -1,12 +1,8 @@
-module;
-
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include "Engine.hpp"
 
 #include <print>
 #include <stdexcept>
 
-module Engine;
 
 namespace Core
 {
@@ -55,6 +51,7 @@ namespace Core
         : m_title{title},
           m_startFullscreen{true}
     {
+        std::print("Engine with Title Only \n");
         initWindow();
     }
 
@@ -63,6 +60,7 @@ namespace Core
           m_windowSize{width, height},
           m_startFullscreen{false}
     {
+        std::print("Engine with width, height, and title\n");
         initWindow();
     }
 
@@ -81,6 +79,7 @@ namespace Core
 
     void Engine::run()
     {
+        initMath();
         initObjects();
 
         while (isWindowRunning())
@@ -94,14 +93,18 @@ namespace Core
 
         shutdown();
     }
-
+    static void glfwErrorCallback(int error, const char* description)
+    {
+        std::println(stderr, "GLFW Error {}: {}", error, description);
+    }
     void Engine::initWindow()
     {
+        glfwSetErrorCallback(glfwErrorCallback);
         if (glfwInit() == GLFW_FALSE)
         {
             throw std::runtime_error{"Failed to initialize GLFW."};
         }
-
+        //glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);

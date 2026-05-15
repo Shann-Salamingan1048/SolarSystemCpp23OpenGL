@@ -1,4 +1,4 @@
-module;
+#pragma once
 
 #include <string>
 #include <string_view>
@@ -6,12 +6,10 @@ module;
 #include <memory>
 #include <glad/glad.h>
 
-export module ResourceManager;
+class Shader;
+class Texture;
 
-import Shader;
-import Texture;
-
-export class ResourceManager
+class ResourceManager
 {
 public:
     ResourceManager() = delete;

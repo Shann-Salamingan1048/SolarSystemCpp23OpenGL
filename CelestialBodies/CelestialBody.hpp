@@ -1,14 +1,24 @@
-module;
-#include <glad/glad.h>
+#pragma once
+
 #include <cstdint>
+#include <vector>
 
-export module CelestialBody;
+#include <glm/glm.hpp>
 
-import Sphere;
-import Shader;
-import Texture;
+#include "../Shapes/Sphere.hpp" // Required because Sphere is stored by value
 
-export class CelestialBody
+// Forward declarations are enough for pointers/references
+class Shader;
+class Texture;
+
+inline std::vector<glm::vec3> celestialBodiesPositions{};
+
+inline void AddCelestialBodyPos(const glm::vec3& spawn)
+{
+    celestialBodiesPositions.emplace_back(spawn);
+}
+
+class CelestialBody
 {
 public:
     CelestialBody() = default;
@@ -94,27 +104,30 @@ public:
         return m_velocityRotation;
     }
 
-    [[nodiscard]] auto getShader() -> Shader&
+    [[nodiscard]] Shader& getShader()
     {
         return *p_shader;
     }
-    [[nodiscard]] auto getTexture() -> const Texture&
+
+    [[nodiscard]] const Texture& getTexture() const
     {
         return *p_texture;
     }
-    [[nodiscard]] auto getSphere() -> Sphere&
+
+    [[nodiscard]] Sphere& getSphere()
     {
         return p_sphere;
     }
-    [[nodiscard]] auto getSphere() const -> const Sphere&
+
+    [[nodiscard]] const Sphere& getSphere() const
     {
         return p_sphere;
     }
 
 protected:
-    Shader* p_shader{};              // non-const: for use(), uniforms, setMat4(), etc.
-    const Texture* p_texture{};      // const: CelestialBody only uses/binds it
-    Sphere p_sphere{};               // owned by CelestialBody
+    Shader* p_shader{nullptr};         // non-owning pointer
+    const Texture* p_texture{nullptr}; // non-owning pointer
+    Sphere p_sphere{};                 // owned by CelestialBody
 
 private:
     float m_velocityRevolution{0.0f};

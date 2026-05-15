@@ -1,23 +1,50 @@
-module;
-#include <glad/glad.h>
+#include "ebo.hpp"
 
-module EBO;
 EBO::EBO(GLuint* indices, GLsizeiptr size)
 {
-	// 1. Create AND initialize the buffer state immediately
-	glCreateBuffers(1, &ID);
-
-	// 2. Upload the data directly to the initialized ID
-	glNamedBufferData(ID, size, indices, GL_STATIC_DRAW);
+	SetData(indices, size);
 }
 
 EBO::EBO(const GLuint* indices, GLsizeiptr size)
 {
-	glCreateBuffers(1, &ID);
+	SetData(indices, size);
+}
+
+EBO::~EBO()
+{
+	Delete();
+}
+
+EBO::EBO(EBO&& other) noexcept
+	: ID{other.ID}
+{
+	other.ID = 0;
+}
+
+EBO& EBO::operator=(EBO&& other) noexcept
+{
+	if (this != &other)
+	{
+		Delete();
+
+		ID = other.ID;
+		other.ID = 0;
+	}
+
+	return *this;
+}
+
+void EBO::SetData(const GLuint* indices, GLsizeiptr size)
+{
+	if (ID == 0)
+	{
+		glCreateBuffers(1, &ID);
+	}
+
 	glNamedBufferData(ID, size, indices, GL_STATIC_DRAW);
 }
 
-void EBO::Bind()
+void EBO::Bind() const
 {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ID);
 }
@@ -27,7 +54,11 @@ void EBO::Unbind()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void EBO::Delete()
+void EBO::Delete() noexcept
 {
-	glDeleteBuffers(1, &ID);
+	if (ID != 0)
+	{
+		glDeleteBuffers(1, &ID);
+		ID = 0;
+	}
 }

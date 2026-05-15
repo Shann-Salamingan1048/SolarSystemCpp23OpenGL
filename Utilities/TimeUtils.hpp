@@ -1,6 +1,6 @@
-export module Time;
+#pragma once
 
-export namespace ShannUtilities
+namespace ShannUtilities
 {
     struct Time
     {

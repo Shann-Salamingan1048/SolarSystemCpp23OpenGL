@@ -1,28 +1,51 @@
-module;
-#include <glad/glad.h>
-
-
-module VBO;
+#include "vbo.hpp"
 
 VBO::VBO(GLfloat* vertices, GLsizeiptr size)
 {
-	// 1. Create AND initialize the buffer state immediately
-	glCreateBuffers(1, &ID);
-
-	// 2. Safely upload the data directly to the initialized ID
-	glNamedBufferData(ID, size, vertices, GL_STATIC_DRAW);
+	SetData(vertices, size);
 }
 
 VBO::VBO(const GLfloat* vertices, GLsizeiptr size)
 {
-	glCreateBuffers(1, &ID);
+	SetData(vertices, size);
+}
+
+VBO::~VBO()
+{
+	Delete();
+}
+
+VBO::VBO(VBO&& other) noexcept
+	: ID{other.ID}
+{
+	other.ID = 0;
+}
+
+VBO& VBO::operator=(VBO&& other) noexcept
+{
+	if (this != &other)
+	{
+		Delete();
+
+		ID = other.ID;
+		other.ID = 0;
+	}
+
+	return *this;
+}
+
+void VBO::SetData(const GLfloat* vertices, GLsizeiptr size)
+{
+	if (ID == 0)
+	{
+		glCreateBuffers(1, &ID);
+	}
+
 	glNamedBufferData(ID, size, vertices, GL_STATIC_DRAW);
 }
 
-void VBO::Bind()
+void VBO::Bind() const
 {
-	// You likely won't need to call this anymore since your VAO handles
-	// the VBO linkage directly, but it is safe to keep just in case!
 	glBindBuffer(GL_ARRAY_BUFFER, ID);
 }
 
@@ -31,7 +54,11 @@ void VBO::Unbind()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void VBO::Delete()
+void VBO::Delete() noexcept
 {
-	glDeleteBuffers(1, &ID);
+	if (ID != 0)
+	{
+		glDeleteBuffers(1, &ID);
+		ID = 0;
+	}
 }

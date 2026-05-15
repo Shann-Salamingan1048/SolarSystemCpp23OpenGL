@@ -1,81 +1,214 @@
-﻿module;
-#include <glad/glad.h>
+﻿#include "Texture.hpp"
+
+#define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_images.h>
+
 #include <print>
-module Texture;
-Texture::Texture(const char* image, GLenum texType, GLenum slot, GLenum pixelType, bool verticalEnable)
+
+Texture::Texture(
+    const char* image,
+    GLenum texType,
+    GLenum texSlot,
+    GLenum pixelType,
+    bool verticalEnable
+)
 {
-	init(image, texType,slot,pixelType,verticalEnable);
+    init(image, texType, texSlot, pixelType, verticalEnable);
 }
 
-void Texture::init(const char *image, GLenum texType, GLenum slot, GLenum pixelType, bool verticalEnable)
+Texture::~Texture()
 {
-	type = texType;
-	std::println("Loading texture: {}", image);
+    Delete();
+}
 
-	int widthImg, heightImg, numColCh;
-	stbi_set_flip_vertically_on_load(verticalEnable);
-	unsigned char* bytes = stbi_load(image, &widthImg, &heightImg, &numColCh, 0);
+Texture::Texture(Texture&& other) noexcept
+    : ID{other.ID},
+      type{other.type},
+      slot{other.slot}
+{
+    other.ID = 0;
+}
 
-	if (!bytes)
-	{
-		std::println("Failed to load image: {}", image);
-		return;
-	}
+Texture& Texture::operator=(Texture&& other) noexcept
+{
+    if (this != &other)
+    {
+        Delete();
 
-	GLenum imgFormat;
-	switch (numColCh)
-	{
-		case 1: imgFormat = GL_RED;  break;
-		case 4: imgFormat = GL_RGBA; break;
-		default:
-			imgFormat = GL_RGB;
-			std::println("Warning: unexpected numColCh = {}, defaulting to GL_RGB", numColCh);
-			break;
-	}
+        ID = other.ID;
+        type = other.type;
+        slot = other.slot;
 
-	glGenTextures(1, &ID);
-	glActiveTexture(slot);
-	glBindTexture(texType, ID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // Horizontal wrap
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // Vertical
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        other.ID = 0;
+    }
 
-	glTexImage2D(texType, 0, imgFormat, widthImg, heightImg, 0, imgFormat, pixelType, bytes);
-	glGenerateMipmap(texType);
+    return *this;
+}
 
-	stbi_image_free(bytes);
+void Texture::init(
+    const char* image,
+    GLenum texType,
+    GLenum texSlot,
+    GLenum pixelType,
+    bool verticalEnable
+)
+{
+    Delete();
+
+    type = texType;
+    slot = texSlot;
+
+    std::println("Loading texture: {}", image);
+
+    int widthImg = 0;
+    int heightImg = 0;
+    int numColCh = 0;
+
+    stbi_set_flip_vertically_on_load(verticalEnable);
+
+    unsigned char* bytes = stbi_load(
+        image,
+        &widthImg,
+        &heightImg,
+        &numColCh,
+        0
+    );
+
+    if (bytes == nullptr)
+    {
+        std::println("Failed to load image: {}", image);
+        std::println("stbi reason: {}", stbi_failure_reason());
+        return;
+    }
+
+    GLenum imgFormat = GL_RGB;
+
+    switch (numColCh)
+    {
+        case 1:
+            imgFormat = GL_RED;
+            break;
+
+        case 3:
+            imgFormat = GL_RGB;
+            break;
+
+        case 4:
+            imgFormat = GL_RGBA;
+            break;
+
+        default:
+            std::println(
+                "Warning: unexpected channel count = {}, defaulting to GL_RGB",
+                numColCh
+            );
+            imgFormat = GL_RGB;
+            break;
+    }
+
+    glGenTextures(1, &ID);
+
+    glActiveTexture(slot);
+    glBindTexture(type, ID);
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    glTexParameteri(type, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(type, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTexImage2D(
+        type,
+        0,
+        imgFormat,
+        widthImg,
+        heightImg,
+        0,
+        imgFormat,
+        pixelType,
+        bytes
+    );
+
+    glGenerateMipmap(type);
+
+    glBindTexture(type, 0);
+
+    stbi_image_free(bytes);
+
+    std::println(
+        "Texture loaded successfully: {} | size: {}x{} | channels: {} | ID: {}",
+        image,
+        widthImg,
+        heightImg,
+        numColCh,
+        ID
+    );
 }
 
 void Texture::setFilterTexture(GLint filter1, GLint filter2)
 {
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, filter1);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, filter2);
+    if (ID == 0)
+    {
+        return;
+    }
+
+    glActiveTexture(slot);
+    glBindTexture(type, ID);
+
+    glTexParameteri(type, GL_TEXTURE_WRAP_S, filter1);
+    glTexParameteri(type, GL_TEXTURE_WRAP_T, filter2);
+
+    glBindTexture(type, 0);
 }
 
 void Texture::setFilterMipMap(GLint filter1, GLint filter2)
 {
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter1);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter2);
+    if (ID == 0)
+    {
+        return;
+    }
+
+    glActiveTexture(slot);
+    glBindTexture(type, ID);
+
+    glTexParameteri(type, GL_TEXTURE_MIN_FILTER, filter1);
+    glTexParameteri(type, GL_TEXTURE_MAG_FILTER, filter2);
+
+    glBindTexture(type, 0);
 }
 
-void Texture::setActiveTexture(GLenum slot)
+void Texture::setActiveTexture(GLenum texSlot)
 {
-	glActiveTexture(slot);
+    slot = texSlot;
+    glActiveTexture(slot);
 }
 
-void Texture::Bind()
+void Texture::Bind() const
 {
-	glBindTexture(type, ID);
+    if (ID == 0)
+    {
+        std::println("Texture::Bind failed. Texture ID is 0.");
+        return;
+    }
+
+    glActiveTexture(slot);
+    glBindTexture(type, ID);
+
+    std::println("Binding texture ID: {}", ID);
 }
 
-void Texture::Unbind()
+void Texture::Unbind() const
 {
-	glBindTexture(type, 0);
+    glBindTexture(type, 0);
 }
 
-void Texture::Delete()
+void Texture::Delete() noexcept
 {
-	glDeleteTextures(1, &ID);
+    if (ID != 0)
+    {
+        glDeleteTextures(1, &ID);
+        ID = 0;
+    }
 }
