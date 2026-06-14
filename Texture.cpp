@@ -196,7 +196,6 @@ void Texture::Bind() const
     glActiveTexture(slot);
     glBindTexture(type, ID);
 
-    std::println("Binding texture ID: {}", ID);
 }
 
 void Texture::Unbind() const

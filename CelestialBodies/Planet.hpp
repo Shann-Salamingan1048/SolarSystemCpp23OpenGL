@@ -23,7 +23,6 @@ enum class PlanetsEnum : uint8_t
 inline void initPlanetTextures()
 {
     // Diffuse
-    ResourceManager::LoadTexture(SunDiffuse.name, SunDiffuse.path, GL_TEXTURE_2D, GL_TEXTURE0, GL_UNSIGNED_BYTE, true);
     ResourceManager::LoadTexture(MercuryDiffuse.name, MercuryDiffuse.path, GL_TEXTURE_2D, GL_TEXTURE0, GL_UNSIGNED_BYTE, true);
     ResourceManager::LoadTexture(VenusDiffuse.name, VenusDiffuse.path, GL_TEXTURE_2D, GL_TEXTURE0, GL_UNSIGNED_BYTE, true);
     ResourceManager::LoadTexture(EarthDiffuse.name, EarthDiffuse.path, GL_TEXTURE_2D, GL_TEXTURE0, GL_UNSIGNED_BYTE, true);
@@ -35,12 +34,12 @@ inline void initPlanetTextures()
     ResourceManager::LoadTexture(NeptuneDiffuse.name, NeptuneDiffuse.path, GL_TEXTURE_2D, GL_TEXTURE0, GL_UNSIGNED_BYTE, true);
 
     // Specular
-    ResourceManager::LoadTexture(EarthSpecular.name, EarthSpecular.path, GL_TEXTURE_2D, GL_TEXTURE1, GL_UNSIGNED_BYTE, true);
+    //ResourceManager::LoadTexture(EarthSpecular.name, EarthSpecular.path, GL_TEXTURE_2D, GL_TEXTURE1, GL_UNSIGNED_BYTE, true);
 }
 
 inline void initPlanetShaders()
 {
-    ResourceManager::LoadShader("Planet", SphereVertPath, SphereFragPath);
+    ResourceManager::LoadShader("Planet", PlanetVertPath, PlanetFragPath);
 }
 class Planet : public CelestialBody
 {
@@ -49,6 +48,13 @@ public:
 
     void Draw() override;
 
+};
 
 
+struct PlanetData
+{
+    std::vector<std::unique_ptr<Planet>> bodies{};
+    std::vector<uint32_t> indices{};
+    std::vector<glm::vec3> positions{};
+    std::vector<glm::vec3> scales{};
 };

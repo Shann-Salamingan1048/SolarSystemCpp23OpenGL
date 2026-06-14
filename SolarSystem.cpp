@@ -1,14 +1,11 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/gtc/matrix_transform.hpp>
-#include <print>
 
 #include "SolarSystem.hpp"
-#include "CelestialBodies/Planet.hpp"
 #include "Camera.hpp"
 #include "Utilities/TimeUtils.hpp"
 #include "Utilities/globalFunctions.hpp"
-
 
 namespace Game
 {
@@ -22,19 +19,111 @@ namespace Game
     {
     }
 
+    void SolarSystem::initPlanets()
+    {
+        AddPlanet(
+            0,
+            std::make_unique<Planet>(PlanetsEnum::MERCURY),
+            glm::vec3{-4.9f, 0.0f, -18.0f},
+            glm::vec3{0.25f}
+        );
+
+        AddPlanet(
+            1,
+            std::make_unique<Planet>(PlanetsEnum::VENUS),
+            glm::vec3{-3.7f, 0.0f, -18.0f},
+            glm::vec3{0.42f}
+        );
+
+        AddPlanet(
+            2,
+            std::make_unique<Planet>(PlanetsEnum::EARTH),
+            glm::vec3{-2.3f, 0.0f, -18.0f},
+            glm::vec3{0.46f}
+        );
+
+        AddPlanet(
+            3,
+            std::make_unique<Planet>(PlanetsEnum::MARS),
+            glm::vec3{-0.9f, 0.0f, -18.0f},
+            glm::vec3{0.34f}
+        );
+
+        AddPlanet(
+            4,
+            std::make_unique<Planet>(PlanetsEnum::JUPITER),
+            glm::vec3{1.2f, 0.0f, -18.0f},
+            glm::vec3{1.05f}
+        );
+
+        AddPlanet(
+            5,
+            std::make_unique<Planet>(PlanetsEnum::SATURN),
+            glm::vec3{4.0f, 0.0f, -18.0f},
+            glm::vec3{0.92f}
+        );
+
+        AddPlanet(
+            6,
+            std::make_unique<Planet>(PlanetsEnum::URANUS),
+            glm::vec3{6.4f, 0.0f, -18.0f},
+            glm::vec3{0.68f}
+        );
+
+        AddPlanet(
+            7,
+            std::make_unique<Planet>(PlanetsEnum::NEPTUNE),
+            glm::vec3{8.4f, 0.0f, -18.0f},
+            glm::vec3{0.66f}
+        );
+    }
+
+    void SolarSystem::initStars()
+    {
+        AddStar(
+            0,
+            std::make_unique<Star>(StarsEnum::Sun),
+            glm::vec3{-8.5f, 0.0f, -18.0f},
+            glm::vec3{2.5f}
+        );
+    }
+
     void SolarSystem::initObjects()
     {
         initPlanetShaders();
-        initPlanetTextures();
-        m_celestialBodies.emplace_back(std::make_unique<Planet>(PlanetsEnum::MERCURY));
-        m_celestialBodies.emplace_back(std::make_unique<Planet>(PlanetsEnum::VENUS));
-        m_celestialBodies.emplace_back(std::make_unique<Planet>(PlanetsEnum::EARTH));
-        m_celestialBodies.emplace_back(std::make_unique<Planet>(PlanetsEnum::MARS));
-        m_celestialBodies.emplace_back(std::make_unique<Planet>(PlanetsEnum::JUPITER));
-        m_celestialBodies.emplace_back(std::make_unique<Planet>(PlanetsEnum::SATURN));
-        m_celestialBodies.emplace_back(std::make_unique<Planet>(PlanetsEnum::URANUS));
-        m_celestialBodies.emplace_back(std::make_unique<Planet>(PlanetsEnum::NEPTUNE));
+        initStarShaders();
 
+        initPlanetTextures();
+        initStarTextures();
+
+        initStars();
+        initPlanets();
+    }
+
+    void SolarSystem::AddPlanet(
+        uint32_t index,
+        std::unique_ptr<Planet> planetBody,
+        glm::vec3 pos,
+        glm::vec3 scale
+    )
+    {
+        planetData.indices.emplace_back(index);
+        planetData.bodies.emplace_back(std::move(planetBody));
+        planetData.positions.emplace_back(pos);
+        planetData.scales.emplace_back(scale);
+    }
+
+    void SolarSystem::AddStar(
+        uint32_t index,
+        std::unique_ptr<Star> starBody,
+        glm::vec3 pos,
+        glm::vec3 scale
+    )
+    {
+        starData.indices.emplace_back(index);
+        starData.bodies.emplace_back(std::move(starBody));
+        starData.positions.emplace_back(pos);
+        starData.scales.emplace_back(scale);
     }
 
     void SolarSystem::initMath()
@@ -44,40 +133,72 @@ namespace Game
     void SolarSystem::update()
     {
         using namespace ShannUtilities;
+
         Time::currentFrame = static_cast<float>(glfwGetTime());
         Time::deltaTime = Time::currentFrame - Time::lastFrame;
         Time::lastFrame = Time::currentFrame;
 
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
 
+        glClearColor(0.02f, 0.02f, 0.05f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
+
     void SolarSystem::render()
     {
         resizeObjects();
 
         const auto& size = getScreenSize();
+
         const auto projection = glm::perspective(
             glm::radians(45.0f),
             static_cast<float>(size.x) / static_cast<float>(size.y),
             0.01f,
-            100.0f);
+            100.0f
+        );
 
+        const glm::mat4 view = getCamera().GetViewMatrix();
+        const glm::vec3 cameraPosition = getCamera().Position;
 
-        for (const auto& celestialPos : celestialBodiesPositions)
+        glm::vec3 sunPosition{-8.5f, 0.0f, -18.0f};
+
+        // Draw sun
+        for (uint32_t i = 0; i < starData.bodies.size(); ++i)
         {
-            m_renderer.DrawTexturedSphere(*m_celestialBodies[0], getCamera().GetViewMatrix(), projection, glm::vec3{0.0f, 0.0f, 1.0f}, celestialPos);
+            sunPosition = starData.positions[i];
+
+            m_renderer.DrawStar(
+                *starData.bodies[i],
+                view,
+                projection,
+                starData.scales[i],
+                starData.positions[i],
+                cameraPosition,
+                static_cast<float>(glfwGetTime())
+            );
+        }
+
+        // Draw planets using the sun as light source
+        for (uint32_t i = 0; i < planetData.bodies.size(); ++i)
+        {
+            m_renderer.DrawPlanet(
+                *planetData.bodies[i],
+                view,
+                projection,
+                planetData.scales[i],
+                planetData.positions[i],
+                sunPosition,
+                cameraPosition
+            );
         }
     }
 
     void SolarSystem::resizeObjects() const
     {
-
     }
 
     void SolarSystem::cleanUp()
     {
-
     }
 
     void SolarSystem::onKeyAction(int key, int action, int mods)
@@ -90,70 +211,30 @@ namespace Game
 
     void SolarSystem::onMouseClick(int button, int action, int mods)
     {
-
-        if (button != GLFW_MOUSE_BUTTON_LEFT)
-        {
-            return;
-        }
-
-        if (action == GLFW_RELEASE)
-        {
-            m_mouseState = MouseClickState::None;
-            return;
-        }
-
-        if (action != GLFW_PRESS || m_mouseState != MouseClickState::None)
-        {
-            return;
-        }
-
-        auto& camera = getCamera();
-        const auto& size = getScreenSize();
-        const auto mousePos = ShannUtilities::getMousePosition(&getWindow());
-        const auto normalizedMousePos = ShannUtilities::getNormalizedVersion2D(mousePos, size);
-
-        //std::println("Mouse Pos: {}, {}", normalizedMousePos.x, normalizedMousePos.y);
-
-        const auto rayClip = glm::vec4{normalizedMousePos.x, normalizedMousePos.y, -1.0f, 1.0f};
-        const auto projection = glm::perspective(
-            glm::radians(45.0f),
-            static_cast<float>(size.x) / static_cast<float>(size.y),
-            0.01f,
-            100.0f);
-
-        auto rayEye = glm::inverse(projection) * rayClip;
-        rayEye = glm::vec4{rayEye.x, rayEye.y, -1.0f, 0.0f};
-
-        const auto& view = camera.GetViewMatrix();
-        auto rayWorld = glm::vec3{glm::inverse(view) * rayEye};
-        rayWorld = glm::normalize(rayWorld);
-
-        constexpr float spawnDistance = 5.0f;
-        const glm::vec3 spawnPos = camera.Position + (rayWorld * spawnDistance);
-
-        AddCelestialBodyPos(spawnPos);
-        //std::println("Spawned cube via Raycast at: {}, {}, {}", spawnPos.x, spawnPos.y, spawnPos.z);
-
-        m_mouseState = MouseClickState::LeftClick;
     }
 
     void SolarSystem::processInput()
     {
         auto& camera = getCamera();
         auto& window = getWindow();
+
         using namespace ShannUtilities;
+
         if (glfwGetKey(&window, GLFW_KEY_W) == GLFW_PRESS)
         {
             camera.ProcessKeyboard(CameraUtils::Camera_Movement::FORWARD, Time::deltaTime);
         }
+
         if (glfwGetKey(&window, GLFW_KEY_S) == GLFW_PRESS)
         {
             camera.ProcessKeyboard(CameraUtils::Camera_Movement::BACKWARD, Time::deltaTime);
         }
+
         if (glfwGetKey(&window, GLFW_KEY_A) == GLFW_PRESS)
         {
             camera.ProcessKeyboard(CameraUtils::Camera_Movement::LEFT, Time::deltaTime);
         }
+
         if (glfwGetKey(&window, GLFW_KEY_D) == GLFW_PRESS)
         {
             camera.ProcessKeyboard(CameraUtils::Camera_Movement::RIGHT, Time::deltaTime);

@@ -42,6 +42,7 @@ set(SOURCE_FILES
 
         CelestialBodies/CelestialBody.hpp
         CelestialBodies/Planet.cpp
+        CelestialBodies/Star.cpp
 )
 
 add_executable(SolarSystem ${SOURCE_FILES})

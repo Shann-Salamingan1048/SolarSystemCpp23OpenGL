@@ -134,8 +134,6 @@ void Sphere::BuildSphere(float radius, uint32_t sectors, uint32_t stacks)
 
     m_indexCount = static_cast<GLsizei>(m_indices.size());
 
-    std::println("Sphere vertex float count: {}", m_vertices.size());
-    std::println("Sphere index count: {}", m_indexCount);
 }
 
 void Sphere::SetupBuffers()

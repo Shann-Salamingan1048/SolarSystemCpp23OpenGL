@@ -11,12 +11,7 @@
 class Shader;
 class Texture;
 
-inline std::vector<glm::vec3> celestialBodiesPositions{};
 
-inline void AddCelestialBodyPos(const glm::vec3& spawn)
-{
-    celestialBodiesPositions.emplace_back(spawn);
-}
 
 class CelestialBody
 {
@@ -32,13 +27,12 @@ public:
     virtual void Draw() = 0;
 
 protected:
-    // ResourceManager-owned shader
+
     void setShader(Shader& shader) noexcept
     {
         p_shader = &shader;
     }
 
-    // ResourceManager-owned texture
     void setTexture(const Texture& texture) noexcept
     {
         p_texture = &texture;
@@ -104,7 +98,7 @@ public:
         return m_velocityRotation;
     }
 
-    [[nodiscard]] Shader& getShader()
+    [[nodiscard]] Shader& getShader() const
     {
         return *p_shader;
     }
@@ -135,3 +129,5 @@ private:
     bool m_enableRevolution{false};
     bool m_enableRotation{false};
 };
+
+

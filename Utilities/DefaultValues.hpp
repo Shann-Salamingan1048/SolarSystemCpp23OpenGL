@@ -9,9 +9,10 @@ constexpr inline uint8_t DEFAULT_STACKS_SPHERE_VALUE = 18;
 constexpr inline uint8_t DEFAULT_SECTORS_SPHERE_VALUE = 36;
 
 // Shaders
-constexpr inline const char* SphereVertPath = "glsl/sphere.vert";
-constexpr inline const char* SphereFragPath = "glsl/sphere.frag";
-
+constexpr inline const char* PlanetVertPath = "glsl/planet.vert";
+constexpr inline const char* PlanetFragPath = "glsl/planet.frag";
+constexpr inline const char* StarVertPath = "glsl/star.vert";
+constexpr inline const char* StarFragPath = "glsl/star.frag";
 
 // Textures
 struct TextureInfo
