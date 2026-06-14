@@ -57,46 +57,6 @@ protected:
     }
 
 public:
-    void setVelocityRevolution(float velocity) noexcept
-    {
-        m_velocityRevolution = velocity;
-    }
-
-    void setVelocityRotation(float velocity) noexcept
-    {
-        m_velocityRotation = velocity;
-    }
-
-    void setEnableRotation(bool enable) noexcept
-    {
-        m_enableRotation = enable;
-    }
-
-    void setEnableRevolution(bool enable) noexcept
-    {
-        m_enableRevolution = enable;
-    }
-
-public:
-    [[nodiscard]] bool getEnableRevolution() const noexcept
-    {
-        return m_enableRevolution;
-    }
-
-    [[nodiscard]] bool getEnableRotation() const noexcept
-    {
-        return m_enableRotation;
-    }
-
-    [[nodiscard]] float getVelocityRevolution() const noexcept
-    {
-        return m_velocityRevolution;
-    }
-
-    [[nodiscard]] float getVelocityRotation() const noexcept
-    {
-        return m_velocityRotation;
-    }
 
     [[nodiscard]] Shader& getShader() const
     {
@@ -123,11 +83,6 @@ protected:
     const Texture* p_texture{nullptr}; // non-owning pointer
     Sphere p_sphere{};                 // owned by CelestialBody
 
-private:
-    float m_velocityRevolution{0.0f};
-    float m_velocityRotation{0.0f};
-    bool m_enableRevolution{false};
-    bool m_enableRotation{false};
 };
 
 

@@ -13,7 +13,8 @@ void Renderer::DrawPlanet(
     const glm::vec3& scale,
     const glm::vec3& position,
     const glm::vec3& sunPosition,
-    const glm::vec3& cameraPosition
+    const glm::vec3& cameraPosition,
+    float rotationAngle
 )
 {
     auto& shader = body.getShader();
@@ -22,7 +23,8 @@ void Renderer::DrawPlanet(
     shader.use();
 
     glm::mat4 model{1.0f};
-    model = glm::translate(model, position);
+    model = glm::translate(glm::mat4(1.0f), position);
+    model = glm::rotate(model, rotationAngle, glm::vec3(0,1,0));
     model = glm::scale(model, scale);
 
     shader.setMat4("model", model);
@@ -34,7 +36,7 @@ void Renderer::DrawPlanet(
     shader.setVec3("sunPosition", sunPosition);
     shader.setVec3("sunColor", glm::vec3{1.0f, 0.82f, 0.55f});
 
-    shader.setFloat("sunIntensity", 45.0f);
+    shader.setFloat("sunIntensity", 75.0f * 5.0f);
     shader.setFloat("ambientStrength", 0.05f);
     shader.setFloat("shininess", 32.0f);
 

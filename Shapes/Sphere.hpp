@@ -11,7 +11,7 @@
 #include "../vbo.hpp"
 #include "../ebo.hpp"
 
-class Sphere : public BaseShape3D
+class Sphere final : public BaseShape3D
 {
 public:
     Sphere() = default;

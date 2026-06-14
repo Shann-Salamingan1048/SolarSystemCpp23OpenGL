@@ -6,7 +6,7 @@
 #include "Camera.hpp"
 #include "Utilities/TimeUtils.hpp"
 #include "Utilities/globalFunctions.hpp"
-
+#include "Renderer/Renderer.hpp"
 namespace Game
 {
     SolarSystem::SolarSystem(const char* title)
@@ -21,70 +21,97 @@ namespace Game
 
     void SolarSystem::initPlanets()
     {
-        AddPlanet(
+        AddCelestialBody<Planet>(
             0,
             std::make_unique<Planet>(PlanetsEnum::MERCURY),
             glm::vec3{-4.9f, 0.0f, -18.0f},
-            glm::vec3{0.25f}
+            glm::vec3{0.25f},
+            3.0f,
+            3.5f,
+            planetsData
         );
 
-        AddPlanet(
+        AddCelestialBody<Planet>(
             1,
             std::make_unique<Planet>(PlanetsEnum::VENUS),
             glm::vec3{-3.7f, 0.0f, -18.0f},
-            glm::vec3{0.42f}
+            glm::vec3{0.42f},
+            4.5f,
+            2.8f,
+            planetsData
         );
 
-        AddPlanet(
+        AddCelestialBody<Planet>(
             2,
             std::make_unique<Planet>(PlanetsEnum::EARTH),
             glm::vec3{-2.3f, 0.0f, -18.0f},
-            glm::vec3{0.46f}
+            glm::vec3{0.46f},
+            6.0f,
+            2.2f,
+            planetsData
         );
 
-        AddPlanet(
+        AddCelestialBody<Planet>(
             3,
             std::make_unique<Planet>(PlanetsEnum::MARS),
             glm::vec3{-0.9f, 0.0f, -18.0f},
-            glm::vec3{0.34f}
+            glm::vec3{0.34f},
+            7.5f,
+            1.8f,
+            planetsData
         );
 
-        AddPlanet(
+        AddCelestialBody<Planet>(
             4,
             std::make_unique<Planet>(PlanetsEnum::JUPITER),
             glm::vec3{1.2f, 0.0f, -18.0f},
-            glm::vec3{1.05f}
+            glm::vec3{1.05f},
+            9.5f,
+            1.2f,
+            planetsData
         );
 
-        AddPlanet(
+        AddCelestialBody<Planet>(
             5,
             std::make_unique<Planet>(PlanetsEnum::SATURN),
             glm::vec3{4.0f, 0.0f, -18.0f},
-            glm::vec3{0.92f}
+            glm::vec3{0.92f},
+            12.0f,
+            1.0f,
+            planetsData
         );
 
-        AddPlanet(
+        AddCelestialBody<Planet>(
             6,
             std::make_unique<Planet>(PlanetsEnum::URANUS),
             glm::vec3{6.4f, 0.0f, -18.0f},
-            glm::vec3{0.68f}
+            glm::vec3{0.75f},
+            14.0f,
+            0.7f,
+            planetsData
         );
 
-        AddPlanet(
+        AddCelestialBody<Planet>(
             7,
             std::make_unique<Planet>(PlanetsEnum::NEPTUNE),
             glm::vec3{8.4f, 0.0f, -18.0f},
-            glm::vec3{0.66f}
+            glm::vec3{0.70f},
+            16.0f,
+            0.5f,
+            planetsData
         );
     }
 
     void SolarSystem::initStars()
     {
-        AddStar(
+        AddCelestialBody<Star>(
             0,
             std::make_unique<Star>(StarsEnum::Sun),
             glm::vec3{-8.5f, 0.0f, -18.0f},
-            glm::vec3{2.5f}
+            glm::vec3{2.5f},
+            0.0f,
+            2.0f,
+            starsData
         );
     }
 
@@ -98,32 +125,9 @@ namespace Game
 
         initStars();
         initPlanets();
-    }
 
-    void SolarSystem::AddPlanet(
-        uint32_t index,
-        std::unique_ptr<Planet> planetBody,
-        glm::vec3 pos,
-        glm::vec3 scale
-    )
-    {
-        planetData.indices.emplace_back(index);
-        planetData.bodies.emplace_back(std::move(planetBody));
-        planetData.positions.emplace_back(pos);
-        planetData.scales.emplace_back(scale);
-    }
-
-    void SolarSystem::AddStar(
-        uint32_t index,
-        std::unique_ptr<Star> starBody,
-        glm::vec3 pos,
-        glm::vec3 scale
-    )
-    {
-        starData.indices.emplace_back(index);
-        starData.bodies.emplace_back(std::move(starBody));
-        starData.positions.emplace_back(pos);
-        starData.scales.emplace_back(scale);
+        auto& cam = getCamera();
+        cam.MovementSpeed = 10.0f;
     }
 
     void SolarSystem::initMath()
@@ -140,8 +144,10 @@ namespace Game
 
         glEnable(GL_DEPTH_TEST);
 
-        glClearColor(0.02f, 0.02f, 0.05f, 1.0f);
+        glClearColor(0.05f, 0.05f, 0.07f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
     }
 
     void SolarSystem::render()
@@ -163,32 +169,52 @@ namespace Game
         glm::vec3 sunPosition{-8.5f, 0.0f, -18.0f};
 
         // Draw sun
-        for (uint32_t i = 0; i < starData.bodies.size(); ++i)
+        for (uint32_t i = 0; i < starsData.bodies.size(); ++i)
         {
-            sunPosition = starData.positions[i];
+            sunPosition = starsData.positions[i];
 
-            m_renderer.DrawStar(
-                *starData.bodies[i],
+            Renderer::DrawStar(
+                *starsData.bodies[i],
                 view,
                 projection,
-                starData.scales[i],
-                starData.positions[i],
+                starsData.scales[i],
+                starsData.positions[i],
                 cameraPosition,
                 static_cast<float>(glfwGetTime())
             );
         }
 
-        // Draw planets using the sun as light source
-        for (uint32_t i = 0; i < planetData.bodies.size(); ++i)
+        float time = static_cast<float>(glfwGetTime()) * 0.05f;
+
+        for (size_t i = 0; i < planetsData.bodies.size(); i++)
         {
-            m_renderer.DrawPlanet(
-                *planetData.bodies[i],
+            glm::vec3 basePos = planetsData.positions[i];
+
+            float radius = glm::length(glm::vec2(basePos.x, basePos.z));
+
+            float orbitSpeed = planetsData.revolutionSpeeds[i];
+
+            float angle = time * orbitSpeed;
+
+
+            glm::vec3 finalPos;
+            finalPos.x = sunPosition.x + cos(angle) * radius;
+            finalPos.y = sunPosition.y;
+            finalPos.z = sunPosition.z + sin(angle) * radius;
+
+
+            float rotationSpeed = planetsData.rotationSpeeds[i];
+            float rotationAngle = time * rotationSpeed;
+
+            Renderer::DrawPlanet(
+                *planetsData.bodies[i],
                 view,
                 projection,
-                planetData.scales[i],
-                planetData.positions[i],
+                planetsData.scales[i],
+                finalPos,
                 sunPosition,
-                cameraPosition
+                cameraPosition,
+                rotationAngle
             );
         }
     }

@@ -7,28 +7,15 @@
 #include <glm/glm.hpp>
 
 #include "Engine/Engine.hpp"
-#include "Renderer/Renderer.hpp"
+
+#include "CelestialBodies/CelestialBody.hpp"
 #include "CelestialBodies/Planet.hpp"
 #include "CelestialBodies/Star.hpp"
 
+#include <concepts>
+
 namespace Game
 {
-    struct PlanetData
-    {
-        std::vector<uint32_t> indices;
-        std::vector<std::unique_ptr<Planet>> bodies;
-        std::vector<glm::vec3> positions;
-        std::vector<glm::vec3> scales;
-    };
-
-    struct StarData
-    {
-        std::vector<uint32_t> indices;
-        std::vector<std::unique_ptr<Star>> bodies;
-        std::vector<glm::vec3> positions;
-        std::vector<glm::vec3> scales;
-    };
-
     enum class MouseClickState : std::uint8_t
     {
         None,
@@ -37,29 +24,14 @@ namespace Game
         Scroll,
     };
 
+    template<typename T>
+    concept CelestialBodyOnly = std::derived_from<T, CelestialBody>;
+
     class SolarSystem final : public Core::Engine
     {
     public:
         explicit SolarSystem(const char* title);
         SolarSystem(int width, int height, const char* title);
-
-    public:
-        void AddPlanet(
-            uint32_t index,
-            std::unique_ptr<Planet> planetBody,
-            glm::vec3 pos,
-            glm::vec3 scale
-        );
-
-        void AddStar(
-            uint32_t index,
-            std::unique_ptr<Star> starBody,
-            glm::vec3 pos,
-            glm::vec3 scale
-        );
-
-        void initPlanets();
-        void initStars();
 
     protected:
         void processInput() override;
@@ -74,9 +46,49 @@ namespace Game
         void resizeObjects() const;
 
     private:
-        Renderer m_renderer{};
-        PlanetData planetData{};
-        StarData starData{};
+        template<CelestialBodyOnly T>
+        struct CelestialBodyData
+        {
+            std::vector<uint32_t> indices;
+            std::vector<std::unique_ptr<T>> bodies;
+
+            std::vector<glm::vec3> positions;
+            std::vector<glm::vec3> scales;
+
+            std::vector<float> revolutionSpeeds;
+            std::vector<float> rotationSpeeds;
+        };
+
+        using PlanetsData = CelestialBodyData<Planet>;
+        using StarsData   = CelestialBodyData<Star>;
+
+
+        template<CelestialBodyOnly T>
+        void AddCelestialBody(
+            uint32_t index,
+            std::unique_ptr<T> body,
+            glm::vec3 pos,
+            glm::vec3 scale,
+            float revSpeed,
+            float rotSpeed,
+            CelestialBodyData<T>& data
+        )
+        {
+            data.indices.emplace_back(index);
+            data.bodies.emplace_back(std::move(body));
+            data.positions.emplace_back(pos);
+            data.scales.emplace_back(scale);
+            data.revolutionSpeeds.emplace_back(revSpeed);
+            data.rotationSpeeds.emplace_back(rotSpeed);
+        }
+
+    private:
+        void initPlanets();
+        void initStars();
+
+    private:
+        PlanetsData planetsData{};
+        StarsData starsData{};
 
         MouseClickState m_mouseState{MouseClickState::None};
     };

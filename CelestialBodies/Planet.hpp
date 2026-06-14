@@ -41,20 +41,11 @@ inline void initPlanetShaders()
 {
     ResourceManager::LoadShader("Planet", PlanetVertPath, PlanetFragPath);
 }
-class Planet : public CelestialBody
+class Planet final : public CelestialBody
 {
 public:
     Planet(const PlanetsEnum& planet);
 
     void Draw() override;
 
-};
-
-
-struct PlanetData
-{
-    std::vector<std::unique_ptr<Planet>> bodies{};
-    std::vector<uint32_t> indices{};
-    std::vector<glm::vec3> positions{};
-    std::vector<glm::vec3> scales{};
 };

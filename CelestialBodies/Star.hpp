@@ -21,7 +21,7 @@ inline void initStarShaders()
 {
     ResourceManager::LoadShader("Star", StarVertPath, StarFragPath);
 }
-class Star : public CelestialBody
+class Star final : public CelestialBody
 {
 public:
     Star(const StarsEnum& star);

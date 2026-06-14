@@ -64,7 +64,6 @@ namespace Core
         static void mouseMoveCallback(GLFWwindow* window, double xpos, double ypos) noexcept;
         static void printCurrentGpu() noexcept;
         static auto fromWindow(GLFWwindow* window) noexcept -> Engine*;
-        static auto glfwErrorCallBack(int error,const char* description);
     private:
         std::string m_title;
         CameraUtils::Camera m_camera{glm::vec3(0.0f, 0.0f, 3.0f)};

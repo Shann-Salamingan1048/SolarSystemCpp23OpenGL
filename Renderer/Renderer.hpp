@@ -9,18 +9,18 @@ class CelestialBody;
 
 struct Renderer
 {
-public:
-    void DrawPlanet(
+    static void DrawPlanet(
         CelestialBody& body,
         const glm::mat4& view,
         const glm::mat4& projection,
         const glm::vec3& scale,
         const glm::vec3& position,
         const glm::vec3& sunPosition,
-        const glm::vec3& cameraPosition
+        const glm::vec3& cameraPosition,
+        float rotationAngle
     );
 
-    void DrawStar(
+    static void DrawStar(
         CelestialBody& body,
         const glm::mat4& view,
         const glm::mat4& projection,
